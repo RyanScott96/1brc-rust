@@ -140,7 +140,7 @@ fn output_data(data: Vec<FxHashMap<&[u8], WeatherData>>) {
     }
 
     let mut keys = combined_map.keys().cloned().collect::<Vec<&[u8]>>();
-    keys.sort();
+    keys.sort_unstable();
 
     for key in keys.iter() {
         let value = combined_map.get(key).unwrap();
