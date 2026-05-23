@@ -1,6 +1,7 @@
 use std::{collections::HashMap, fs::File, thread::available_parallelism};
 
 use memmap2::Mmap;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 
 struct WeatherData {
     min: i16,
@@ -10,11 +11,11 @@ struct WeatherData {
 }
 
 fn main() {
-    let file = File::open("1000.txt").expect("failed to open file");
+    let file = File::open("measurements.txt").expect("failed to open file");
     let mmap = unsafe { Mmap::map(&file).expect("failed to memory map file") };
     let chunks: Vec<(usize, usize)> = get_chunks(&mmap).expect("unable to read file");
 
-    let mut hashmaps = Vec::<HashMap<&[u8], WeatherData>>::new();
+    let mut hashmaps = Vec::<FxHashMap<&[u8], WeatherData>>::new();
 
     crossbeam::scope(|s| {
         let mut handles = vec![];
@@ -56,8 +57,8 @@ fn get_chunks(mmap: &Mmap) -> Result<Vec<(usize, usize)>, Box<dyn std::error::Er
 fn process_data(
     mmap: &Mmap,
     chunk: (usize, usize),
-) -> Result<HashMap<&[u8], WeatherData>, Box<dyn std::error::Error>> {
-    let mut map = HashMap::<&[u8], WeatherData>::new();
+) -> Result<FxHashMap<&[u8], WeatherData>, Box<dyn std::error::Error>> {
+    let mut map = FxHashMap::<&[u8], WeatherData>::with_hasher(FxBuildHasher::default());
 
     let mut cursor = chunk.0;
     let mut line_start = cursor;
@@ -116,7 +117,7 @@ fn process_data(
     Ok(map)
 }
 
-fn output_data(data: Vec<HashMap<&[u8], WeatherData>>) {
+fn output_data(data: Vec<FxHashMap<&[u8], WeatherData>>) {
     let mut combined_map = HashMap::<&[u8], WeatherData>::new();
 
     for map in data.iter() {
@@ -144,11 +145,11 @@ fn output_data(data: Vec<HashMap<&[u8], WeatherData>>) {
     for key in keys.iter() {
         let value = combined_map.get(key).unwrap();
         println!(
-            "{};{};{};{}",
+            "{};{:.1};{:.1};{:.1}",
             std::str::from_utf8(key).unwrap(),
             value.min as f64 / 10.0,
             value.max as f64 / 10.0,
-            value.total / value.count as i64
+            value.total as f64 / value.count as f64 / 10.0
         );
     }
 }

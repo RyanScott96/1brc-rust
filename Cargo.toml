@@ -8,3 +8,4 @@ edition = "2024"
 [dependencies]
 crossbeam = "0.8.4"
 memmap2 = "0.9.10"
+rustc-hash = "2.1.2"
