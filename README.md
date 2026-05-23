@@ -24,7 +24,6 @@ cargo build --release
 ```
 
 **3. Run and Time**
-```
-bash
+```bash
 time ./target/release/onebrc
 ```
