@@ -18,12 +18,12 @@ This pipeline achieves sub-10-second execution times for a 13GB dataset on consu
 **1. Generate the Data**
 You need the 1 billion row `measurements.txt` file. Instructions are found at https://github.com/gunnarmorling/1brc
 
-***2. Build the binary***
+**2. Build the binary**
 ```bash
 cargo build --release
 ```
 
-***3. Run and Time***
+**3. Run and Time**
 ```
 bash
 time ./target/release/onebrc
